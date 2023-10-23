@@ -3,7 +3,6 @@ const ProfileModel = require("../models/profile.model");
 const createProfile = async (req, res) => {
   try {
     const newProfileData = req.body;
-    console.log(newProfileData);
     const name = req.body.name;
     const checkProfile = await ProfileModel.findOne({ name });
     if (checkProfile)
