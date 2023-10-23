@@ -23,6 +23,10 @@ const commentSchema = new mongoose.Schema(
     profileId : {
       type: mongoose.Schema.Types.ObjectId,
     },
+    created_at: {
+      type: Date,
+      default: Date.now(),
+    }
   },
   {
     timestamp: true,

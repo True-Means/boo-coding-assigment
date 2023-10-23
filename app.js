@@ -27,9 +27,8 @@ async function startInMemoryMongoDB() {
     await mongod.start();
   
     // Get the connection URI for the in-memory MongoDB.
-    const uri = mongod.getUri();
-    console.log("uri", uri);
-    // const uri = 'mongodb://127.0.0.1:27017/test';
+    // const uri = mongod.getUri();
+    const uri = 'mongodb://127.0.0.1:27017/test';
   
     // Use the MongoDB URI for connecting to the in-memory database.
     // Replace this with your actual application's database connection logic.
