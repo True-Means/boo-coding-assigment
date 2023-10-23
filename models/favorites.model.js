@@ -3,14 +3,11 @@ const mongoose = require("mongoose");
 const favoriteSchema = new mongoose.Schema(
   {
     commentId: {
-      type: String,
-      required: true,
-      unique: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'comment'
     },
     profileId : {
-      type: String,
-      required: true,
-      unique: true,
+      type: mongoose.Schema.Types.ObjectId,
     },
   },
   {

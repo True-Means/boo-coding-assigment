@@ -1,97 +1,111 @@
-const { toggleLike } = require("../comment.controller");
-const FavoriteModel = require("../../models/favorites.model");
+const { toggleLike } = require('../comment.controller'); // Import the function to be tested
+const FavoriteModel = require('../../models/favorites.model'); // Import the FavoriteModel
 
-jest.mock("../../models/favorites.model", () => ({
-  findOne: jest.fn(),
-  deleteOne: jest.fn(),
-  create: jest.fn(),
-}));
-
+// Mock the FavoriteModel.findOne, FavoriteModel.deleteOne, and FavoriteModel.create functions
+FavoriteModel.findOne = jest.fn();
+FavoriteModel.deleteOne = jest.fn();
+FavoriteModel.prototype.save = jest.fn();
 describe('toggleLike', () => {
-  it('should create a favorite if it does not exist', async () => {
+  it('should remove a favorite when it exists', async () => {
+    // Arrange
     const req = {
-      params: { commentId: '14daaefa45512', profileId: '3746aebb23512' },
+      body: {
+        commentId: '6536425fa2cbe03e96e6865a',
+        profileId: '653613ee9a0a75b59e0435c6',
+      },
     };
     const res = {
-      status: jest.fn().mockReturnThis(),
+      status: jest.fn(() => res),
       json: jest.fn(),
     };
 
-    // Mock the findOne method to return null (favorite does not exist)
-    FavoriteModel.findOne.mockResolvedValue(req.params);
+    // Mock FavoriteModel.findOne to return a favorite
+    FavoriteModel.findOne.mockResolvedValue({});
 
-    // Mock the create method
-    FavoriteModel.create.mockResolvedValues({ commentId: '14daaefa4552', profileId: '3746aebb234' });
-
+    // Act
     await toggleLike(req, res);
 
-    // expect(res.status).toHaveBeenCalledWith(200);
-    // expect(res.json).toHaveBeenCalledWith({
-    //   code: 200,
-    //   data: undefined,
-    // });
-
-    // expect(res.status).toHaveBeenCalledWith(200);
-    // expect(res.json).toHaveBeenCalledWith({
-    //   code: 200,
-    //   data: {
-    //     commentId: '14daaefa4552',
-    //     profileId: '3746aebb234',
-    //   },
-    // });
-
-    expect(FavoriteModel.findOne).toHaveBeenCalledWith({ commentId: '14daaefa455', profileId: '3746aebb234' });
-    expect(FavoriteModel.create).toHaveBeenCalledWith({ code: 200, data: { commentId: '14daaefa4552', profileId: '3746aebb234' } });
-
-    // expect(res.status).toHaveBeenCalledWith(200);
-    // expect(res.json).toHaveBeenCalledWith({ code: 200, data: { commentId: '14daaefa4552', profileId: '3746aebb234' } });
+    // Assert
+    expect(FavoriteModel.findOne).toHaveBeenCalledWith({
+      commentId: '6536425fa2cbe03e96e6865a',
+      profileId: '653613ee9a0a75b59e0435c6',
+    });
+    expect(FavoriteModel.deleteOne).toHaveBeenCalledWith({
+      commentId: '6536425fa2cbe03e96e6865a',
+      profileId: '653613ee9a0a75b59e0435c6',
+    });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      code: 200,
+      data: {
+        commentId: '6536425fa2cbe03e96e6865a',
+        profileId: '653613ee9a0a75b59e0435c6',
+      },
+    });
   });
 
-  // it('should delete a favorite if it exists', async () => {
-  //   const req = {
-  //     params: { commentId: '14daaefa4552', profileId: '3746aebb234' },
-  //   };
-  //   const res = {
-  //     status: jest.fn().mockReturnThis(),
-  //     json: jest.fn(),
-  //   };
-
-  //   // Mock the findOne method to return a favorite
-  //   FavoriteModel.findOne.mockResolvedValue({ /* favorite data */ });
-
-  //   // Mock the deleteOne method
-  //   FavoriteModel.deleteOne.mockResolvedValue({ /* deleted data */ });
-
-  //   await toggleLike(req, res);
-
-  //   expect(FavoriteModel.findOne).toHaveBeenCalledWith({
-  //     commentId: '14daaefa4552',
-  //     profileId: '3746aebb234',
-  //   });
-  //   expect(FavoriteModel.deleteOne).toHaveBeenCalledWith({
-  //     commentId: '14daaefa4552',
-  //     profileId: '3746aebb234',
-  //   });
-
-  //   expect(res.status).toHaveBeenCalledWith(200);
-  //   expect(res.json).toHaveBeenCalledWith({ code: 200, data: { /* deleted data */ } });
-  // });
-
-  it('should handle errors', async () => {
+  it('should add a favorite when it does not exist', async () => {
+    // Arrange
     const req = {
-      params: { commentId: '14daaefa4552', profileId: '3746aebb234' },
+      body: {
+        commentId: '6536425fa2cbe03e96e6865a',
+        profileId: '653613ee9a0a75b59e0435c6',
+      },
     };
     const res = {
-      status: jest.fn().mockReturnThis(),
+      status: jest.fn(() => res),
       json: jest.fn(),
     };
 
-    // Mock the findOne method to throw an error
-    FavoriteModel.findOne.mockRejectedValue(new Error('Favorite retrieval error'));
+    // Mock FavoriteModel.findOne to return null (favorite doesn't exist)
+    FavoriteModel.findOne.mockResolvedValue(null);
 
+    // Mock FavoriteModel.create to return the created favorite
+    const newFavorite = new FavoriteModel(req.body);
+    FavoriteModel.prototype.save.mockResolvedValue(newFavorite);
+
+    // Act
     await toggleLike(req, res);
 
+    // Assert
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      code: 200,
+      data: newFavorite,
+    });
+  });
+
+  it('should handle errors when toggling a favorite', async () => {
+    // Arrange
+    const req = {
+      body: {
+        commentId: '6536425fa2cbe03e96e6865a',
+        profileId: '653613ee9a0a75b59e0435c6',
+      },
+    };
+    const res = {
+      status: jest.fn(() => res),
+      json: jest.fn(),
+    };
+
+    // Mock FavoriteModel.findOne to reject with an error
+    const errorMessage = 'Error finding favorite';
+    FavoriteModel.findOne.mockRejectedValue(errorMessage);
+
+    // Act
+    await toggleLike(req, res);
+
+    // Assert
+    expect(FavoriteModel.findOne).toHaveBeenCalledWith({
+      commentId: '6536425fa2cbe03e96e6865a',
+      profileId: '653613ee9a0a75b59e0435c6',
+    });
     expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({ code: 500, msg: 'Error: Favorite retrieval error' });
+    expect(res.json).toHaveBeenCalledWith({
+      code: 500,
+      msg: errorMessage,
+    });
   });
 });
+
+// You can add more test cases for different scenarios as needed.
