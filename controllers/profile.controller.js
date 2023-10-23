@@ -28,7 +28,6 @@ const createProfile = async (req, res) => {
 
 const getProfileById = async (id) => {
   const profile = await ProfileModel.findById(id);
-  console.log(profile);
   if (profile) {
     return profile;
   } else {

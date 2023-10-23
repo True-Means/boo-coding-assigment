@@ -46,9 +46,8 @@ module.exports = function () {
   });
 
   router.post("/createProfile", createProfile);
-
   router.post("/postComments", postComments);
-  router.get("/getComments", getComments);
+  router.post("/getComments", getComments);
   router.post("/toggleLike", toggleLike);
 
   return router;
